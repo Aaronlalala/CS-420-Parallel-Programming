@@ -26,10 +26,10 @@ They are trying to optimize the performance of caches by predicting the patterns
 
 ## Jacobi Algorithm
 
-![Jacobi Algorithm](/Users/aaronlalala/Documents/Courses/UIUC/CS 420/Figures/Jacobi Algorithm.png)
+![Jacobi Algorithm](Figures/Jacobi Algorithm.png)
 
 It satisfies spatial locality because we are traverse the matrix in row direction. However, it does not promise temporal locality. For example, we are traverse i-1, i, i+1 rows at iteration k, then in next iteration k+1 we will traverse i, i+1, i+2 rows. If the length of matrix is too large. Then when we traverse in the k+1 iteration, the prefetched values of i, i+1 rows might be alrealy overwritten.
 
 To overcome this situation, we could cut the matrix in column direction, and traverse by the following order. 
 
-![Jacobi Divide](/Users/aaronlalala/Documents/Courses/UIUC/CS 420/Jacobi Divide.png)
+![Jacobi Divide](Figures/Jacobi Divide.png)

@@ -9,3 +9,9 @@ Dense matrix use static. If matrix is sparse, we have choice to use static.
 
 
 What is load balancing?
+
+
+
+## Gauss-Seidel Computation
+
+Diagonally parallelizing.
