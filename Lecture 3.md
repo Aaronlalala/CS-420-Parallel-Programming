@@ -91,4 +91,6 @@ Processor looks for data block in the cache but cannot find. It must retrieve it
 
 **Capacity misses:** No space in cache.
 
-**Conflict misses:** The idea is that hits in a fully associative cache that become misses in an set-associative cache. Conflict misses are those that occur going from fully associative to eight-way associative, four-way associative, and so on.
+**Conflict Miss:** This occurs when multiple memory addresses map to the same cache index, resulting in cache entries being overwritten. This type of miss can be reduced by increasing the associativity of the cache.
+
+**Coherency Miss:** This occurs in a multi-processor system when one processor updates a memory address that is also present in the cache of another processor. The cache of the other processor needs to be invalidated to maintain coherency, resulting in a cache miss.

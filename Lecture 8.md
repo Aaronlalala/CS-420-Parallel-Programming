@@ -52,7 +52,7 @@ Another solution is avoid private level 1 cache. Multiple threads share the same
 
 In previous mentioned situation,  one such protocol that can be used is the MESI (Modified, Exclusive, Shared, Invalid) protocol.
 
-When a processor wants to access a cache line in the LLC, it first checks its private cache. If the cache line is not found in the private cache, the processor sends a request to the LLC. If the cache line is found in the LLC and is in the Exclusive or Shared state, the processor can access it. If the cache line is in the Modified state, the processor must first obtain exclusive access to the cache line by invalidating all other copies of the cache line in other private caches.
+When a processor wants to access a cache line in the LLC, it first checks its private cache. If the cache line is not found in the private cache, the processor sends a request to the LLC. If the cache line is found in the LLC and is in the Exclusive or Shared state, the processor can access it. If the cache line is in the Modified state, the processor must first obtain exclusive access to the cache line by invalidating all other copies of the cache line in other private caches.(cause concorency miss)
 
 1. Thread_0 and thread_1 fetch the copy of x to their private caches.
 2. Thread_0 updates the value of x, all copies of x in other private caches will be invalidated.

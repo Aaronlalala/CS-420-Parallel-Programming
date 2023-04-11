@@ -68,6 +68,53 @@ Lunching and destroy threads itself is expensive, we should reduce the number of
 
 Flatten the loop and compute indices inside the loop. What `collapse` in OpenMP does.
 
-
-
 Matrix product
+
+
+
+# Parallelizing Graph Traversal using OpenMP Tasks
+
+**How is the graph stored in memory?** 
+
+We could use adjacency matrix or adjacency list to store it.
+
+**An intuitive way to solve problem:**
+
+We could maintain a queue for breadth first search
+
+**How do I parallelize BFS?**
+
+First we construct tasks: #pragma omp task {...} will start a task that can execute on any of the available threads; the calling task may contintue executing in parallel with the newly created task. Code within the clause are executed parallely.
+
+**More specifically, what can I do?**
+
+Whenever I discover a new vertex, spawn a task and assign the task to visit that vertex.
+
+```c
+typedef struct {
+  int visited; 
+  int numneighbors;
+  int neighbors[];
+} Node;
+Node* graph[N];
+
+void visit(int i) {
+  int j, k, mark;
+  for (j = 0; j < graph[i]->numneighbors; j++) {
+    k = graph[i]->neighbors[j];
+    #pragma omp atomic
+    mark = graph[k]->visited++;
+    if (mark == 0) {
+      #pragma omp task
+      visit(k);
+    }
+  }
+}
+
+int main() {
+  #pragma omp parallel;
+  #pragma omp single
+  visit(0);
+}
+```
+
