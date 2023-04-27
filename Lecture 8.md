@@ -34,7 +34,7 @@ It refers to a physical processor unit within a CPU. It is the basic processing 
 
 # LLC
 
-![image-20230209224340783](/Users/aaronlalala/Library/Application Support/typora-user-images/image-20230209224340783.png)
+<img src="/Users/aaronlalala/Library/Application Support/typora-user-images/image-20230209224340783.png" alt="image-20230209224340783" style="zoom:50%;" />
 
 After thread 0 modify the value of x, the x in LLC is not updated and t1 will fetch x in LLC. How to deal with this situation?
 
