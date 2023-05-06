@@ -63,7 +63,7 @@ DRAM (Dynamic) stores each bit of data in a separate capacitor within a memory c
 
 ## Direct Mapping
 
-Each block of memory can be one-to-one mapped to exactly one cache set. It is simplest and fastest. But it has the least flexibility and will increase cache conflicts, resulting decrease cache hit rate.
+Each block of memory can be one-to-one mapped to exactly one cache set. It is simplest and fastest. But it has the least flexibility. Multiple memory could be mapped to the same block. Thus, data is often overwritten.
 
 [Example](https://www.youtube.com/watch?v=RqKeEIbcnS8)
 
