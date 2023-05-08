@@ -141,13 +141,19 @@ A cache hit is when the requested data is found in cache. When a system wants so
 
 Processor looks for data at cache but cannot find. It must retrieve data from slower main memory.
 
-**Compulsory misses:** A miss when the cache line is accessed for the first time. Because cache is empty. It is also called cold miss.
+**Compulsory misses:** it happens because it's the first time to access that block of data.
 
 **Capacity misses**: This occurs when the cache is not large enough to store all the data that the processor needs.
 
-**Conflict Miss:** This occurs when multiple memory addresses map to the same cache index, resulting in cache entries being overwritten. This type of miss can be reduced by increasing the associativity of the cache.
+**Conflict Miss:** the block of data has been to the cache earlier. However, it was overwritten by other data.
 
 **Coherency Miss:** This occurs in a multi-processor system when one processor updates a memory address that is also present in the cache of another processor. The cache of the other processor needs to be invalidated to maintain coherency, resulting in a cache miss.
+
+
+
+Can compulsory misses be avoided with prefetching? Yes. One main advantage of prefethcing is to reduce the number of compulsory cache misses. Due to spatial locality, when cache will bring target's neighbor block as well.
+
+
 
 ## Temporal Locality
 
@@ -213,11 +219,91 @@ When processors access memory in chunks and data is aligned properly, it only ta
 
 # Architecture
 
-## SMT and Hyperthreading
+## SMT (Hyperthreading)
 
 Simultaneous Multi-Threading and hyperthreading are architecture concepts. Processor without SMT, each core can only execute one thread at a time. When a core is waitng for memory fetch, it is idle. With SMT, processors could utilize those idle time.
+
+## Multi-Cores
+
+Cores within a processor share the main memory. Each core might have a private cache, and share a higher level cache.
+
+## False Sharing
+
+Example:
+
+1. Thread A updates `data[0]`, causing the cache line containing both `data[0]` and `data[1]` to be loaded into Core A's cache and marked as modified.
+2. Thread B tries to update `data[1]`, but it finds that the cache line containing `data[1]` is marked as modified in Core A's cache.
+3. The cache coherence protocol forces Core A to write back the ==modified== cache line to main memory and invalidate its copy.
+4. Core B can now load the updated cache line into its cache, modify `data[1]`, and mark the cache line as modified in its cache.
+5. If Thread A tries to update `data[0]` again, the same process repeats, causing the cache line to bounce back and forth between the two cores.
+
+## Coherence
+
+Coherency and Consistency - what is the difference?
+
+## Synchronization
 
 
 
 Architecture of CPU and GPU. What components are removed and what components are added?
 
+
+
+# MPI and OpenMP
+
+## Function of MPI
+
+1. **int MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm);**
+
+   This function is used to create new communicators by dividing an existing communicator into subgroups based on specified color and key values. `comm` is ths existing communicator that I want to split. `color` is an integer that defines which represent the group label. `key` is the order of the current process in the new communicator. Note that this function is a collective call and ==should be called by all process== with (different) color and key values.
+
+2. What will happen if MPI program uses multiple processes instructions on a single processor machine?
+
+   Numer of processes does not depend on the number of processors of a machine. A single processor machine can also run multiple processes. Different processes communicate with each other by MPI calls instead of global variables. 
+
+3. **int MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm);**
+
+   It is a collective MPI call should be called by all processes within a communicator. `count` is the number of elements to be sent or received, the specified datatype will tell how much is the address offset. `root` the rank of the root processes.
+
+4. int **MPI_Isend**(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request);
+
+   To complete the non-blocking send operation you should use MPI_Waith() or MPI_Test() functions to check the status of the MPI. MPI_Wait is a blocking operation and MPI_Test is not.
+
+5. **MPI_Scatter and MPI_Scatterv**
+
+   Difference compares with broadcast. Broadcast sends the same data to all processes. However, scatter distribute difference blocks of data to all processes. 
+
+   int MPI_Scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm);
+
+   int MPI_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm);
+
+   displs is the starting index of the sendbuf for the current process
+
+6. **Gather and Allgather**
+
+   int MPI_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm); ==Gather collects data from all processes and store it in the root.==
+
+   int MPI_Allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm); ==Allgather collects data from all processes and store in all processes.==
+
+7. **MPI_Barrier** is a collective synchronization function that blocks the calling process until all processes in a specified communicator have called it.
+
+8. **MPI_Alltoall**: each process will have a local variable to send and a local variable to receive. The send data is cut evenly into k=size pieces and be sent to every process including itself. 
+
+   Specifically, this is a good function for matrix transpose. Each processe holds local row and local column variables. Local row is cut evenly and send to every process. Local column receives one piece of data from every process.
+
+## OpenMp Instruction
+
+1. \#pragma omp parallel for: tell compiler to create multiple threads and parallelize the for loop.
+2. \#pragma omp parallel for reduction (+:a[i])
+3. \# pragma omp parallel for **collapse** (2) reduction (+:a): collapse make the nested loop into the single one. The interation index of the loop should be independent with each other.
+
+4. Schedule clause:
+   1. static: \#pragma omp parallel for schedule(static, chunk_size). It divides iteration into equal-sized trunk. Each thread receive predetermined number of iteration to work.
+   2. dynamic: #pragma omp parallel for schedule(dynamic, chunk_size). It better deals with the load balance.
+   3. guided: #pragma omp parallel for schedule(guided, min_chunk_size). It's similar to dynamic. However, the trunk size starts large and decreases over time to min_chunk_size. Balance the load balancing and overhead.
+
+# Matrix
+
+## Compressed Sparse Row
+
+Use three arrays to represent a sparse matrix. The first array stores the values of non-zero values of the matrix. The second array stores the column index of the corresponding non-zero values. The third array stores an object. Its pointer points to the first non-zero values of each row. Its value is the index of that value in the first array.
