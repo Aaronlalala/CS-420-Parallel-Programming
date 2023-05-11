@@ -237,13 +237,15 @@ Example:
 4. Core B can now load the updated cache line into its cache, modify `data[1]`, and mark the cache line as modified in its cache.
 5. If Thread A tries to update `data[0]` again, the same process repeats, causing the cache line to bounce back and forth between the two cores.
 
-## Coherence
+## Coherence & Consistency
 
-Coherency and Consistency - what is the difference?
+What is the difference?
+
+Cores have different parivate caches and copy of the same memory. Coherence protocal ensures that all cores will fetch the updated piece of data. (prevent data race) Consistency determines the order of memory operations
+
+
 
 ## Synchronization
-
-
 
 Architecture of CPU and GPU. What components are removed and what components are added?
 
@@ -259,7 +261,9 @@ Architecture of CPU and GPU. What components are removed and what components are
 
 2. What will happen if MPI program uses multiple processes instructions on a single processor machine?
 
-   Numer of processes does not depend on the number of processors of a machine. A single processor machine can also run multiple processes. Different processes communicate with each other by MPI calls instead of global variables. 
+   Numer of processes does not depend on
+
+    the number of processors of a machine. A single processor machine can also run multiple processes. Different processes communicate with each other by MPI calls instead of global variables. 
 
 3. **int MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm);**
 
@@ -267,7 +271,7 @@ Architecture of CPU and GPU. What components are removed and what components are
 
 4. int **MPI_Isend**(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request);
 
-   To complete the non-blocking send operation you should use MPI_Waith() or MPI_Test() functions to check the status of the MPI. MPI_Wait is a blocking operation and MPI_Test is not.
+   To complete the non-blocking send operation you should use MPI_Wait() or MPI_Test() functions to check the status of the MPI. MPI_Wait is a blocking operation and MPI_Test is not.
 
 5. **MPI_Scatter and MPI_Scatterv**
 
@@ -291,6 +295,12 @@ Architecture of CPU and GPU. What components are removed and what components are
 
    Specifically, this is a good function for matrix transpose. Each processe holds local row and local column variables. Local row is cut evenly and send to every process. Local column receives one piece of data from every process.
 
+9. **MPI_Reduce:**
+
+   int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm);
+
+   It performs some operation to local variables of all processes and stores the result at the root process. For MPI_Allreduce, it does the similar operation but return results to all processes.
+
 ## OpenMp Instruction
 
 1. \#pragma omp parallel for: tell compiler to create multiple threads and parallelize the for loop.
@@ -301,6 +311,7 @@ Architecture of CPU and GPU. What components are removed and what components are
    1. static: \#pragma omp parallel for schedule(static, chunk_size). It divides iteration into equal-sized trunk. Each thread receive predetermined number of iteration to work.
    2. dynamic: #pragma omp parallel for schedule(dynamic, chunk_size). It better deals with the load balance.
    3. guided: #pragma omp parallel for schedule(guided, min_chunk_size). It's similar to dynamic. However, the trunk size starts large and decreases over time to min_chunk_size. Balance the load balancing and overhead.
+5. Data Race: more than one thread accesse the same data simultaneously and at least one of them modifies it.
 
 # Matrix
 
